@@ -1,0 +1,55 @@
+package com.example.main;
+
+import javax.validation.Validator;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
+import com.example.main.entities.Etat;
+import com.example.main.repositories.EtatRepository;
+import com.example.main.repositories.SoldeRepository;
+import com.example.main.services.EtatService;
+import com.example.main.services.GSMService;
+import com.example.main.services.TransfertService;
+import com.example.main.utils.LogMessage;
+
+@SpringBootApplication
+@EnableScheduling
+public class OnemartJobCronAppApplication implements CommandLineRunner{
+	
+	
+	@Autowired
+	EtatRepository etatRepo;
+	@Autowired
+	Validator validator;
+	@Autowired
+	EtatService etatService;
+	@Autowired
+	SoldeRepository soldeRepository;
+	@Autowired
+	GSMService gsmService;
+	
+	@Autowired
+	TransfertService transfertService;
+	
+	@Autowired
+	LogMessage logMessage;
+	
+	public static void main(String[] args) {
+		SpringApplication.run(OnemartJobCronAppApplication.class, args);
+	}
+
+	@Override
+	public void run(String... args) throws Exception {
+		//transfertService.getFailedOrLoadingTransferts().forEach(System.out::println);
+//		Etat etat = etatService.getEtatByName(Etat.EN_COURS);
+		
+		Etat etat = etatService.getEtatByName(Etat.EN_COURS);
+		System.out.println(etat.getTransferts());
+		
+	}
+
+}
