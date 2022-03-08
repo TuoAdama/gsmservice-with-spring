@@ -23,7 +23,7 @@ public class TestController {
 		Transfert transfert1 = Transfert.builder()
 				.id(1L)
 				.numero("0150388646")
-				.montant(25L)
+				.montant(50L)
 				.build();
 		
 		return Arrays.asList(transfert1);

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.example.main.entities.Solde;
 import com.example.main.entities.Transfert;
 import com.example.main.utils.LogMessage;
 
@@ -25,51 +26,57 @@ public class GSMService {
 	private String soldeSyntaxe;
 	@Value("${validateurURL}")
 	private String validatorUrl;
-	
+		
 	@Autowired
 	LogMessage logMessage;
+	
+	@Autowired
+	SoldeService soldeService;
 	
 	private APIRequestService apiRequest = new APIRequestService();
 
 	public HashMap<String, String> makeTransfert(Transfert transfert) {
 		
-		this.syntaxe = this.syntaxe.replaceFirst("NUMERO", transfert.getNumero());
-		this.syntaxe = this.syntaxe.replaceFirst("MONTANT", String.valueOf(transfert.getMontant()));
+		this.syntaxe = this.syntaxe.replaceFirst("NUMERO", transfert.getNumero())
+					.replaceFirst("MONTANT", String.valueOf(transfert.getMontant()));
 		
-		//1.Recuperer le premier solde
 		
-		HashMap<String, Long> previousSoldes = this.getSoldes();
+		Solde previousSoldes = this.getSolde();
 		
 		logMessage.showLog("validation du transfert...");
 		
 		HashMap<String, String> responses = makeUSSD(this.validatorUrl + this.syntaxe);
 		
-		HashMap<String, Long> currentSoldes = this.getSoldes();
+		if(responses.get(MESSAGE).contains("souhaitez-vous continuer @@ cette vente")) {
+			
+			responses = makeUSSD(this.validatorUrl+"1");
+			
+			if(responses.get(RESPONSE).equals(ERROR)) {
+				return this.failedTransfert(responses);
+			}
+		}
+		
+		Solde currentSoldes = this.getSolde();
 		
 		boolean soldesExists = previousSoldes != null && currentSoldes != null;
 		
 		if (responses.get(RESPONSE).equals(ERROR)) {
 			
-			if(soldesExists && soldeIschange(previousSoldes, currentSoldes)) {
+			if(soldesExists && soldeService.soldeIschange(previousSoldes, currentSoldes)) {
 				responses.put(MESSAGE, null);
 				responses.put(RESPONSE, SUCCESS);
-				logMessage.showLog("Transfert validé !\n");
+				logMessage.showLog("Transfert validé !\n\n");
 				return responses;
 			}
 			
-			responses.put(RESPONSE, ERROR);
-			logMessage.showLog("Transfert echoué :)\n");
-			return responses;		
+			return this.failedTransfert(responses);
 		}
 		
-		if(soldesExists && !soldeIschange(previousSoldes, currentSoldes)) {
-			logMessage.showLog("Transfert echoué :)\n");	
-			responses.put(RESPONSE, ERROR);
-			responses.put(MESSAGE, null);
-			return responses;	
+		if(soldesExists && !soldeService.soldeIschange(previousSoldes, currentSoldes)) {
+			return this.failedTransfert(responses);
 		}
 		
-		logMessage.showLog("Transfert validé !");
+		logMessage.showLog("Transfert validé !\n\n");
 		
 		return responses;
 	}
@@ -104,14 +111,10 @@ public class GSMService {
 		return soldes;
 	}
 	
-	private boolean soldeIschange(HashMap<String, Long> previousSolde, HashMap<String, Long> currentSolde) {
-		return previousSolde.get("solde") != currentSolde.get("solde") ||
-				previousSolde.get("bonus") != currentSolde.get("bonus");
-	}
 	
 	
-	
-	public HashMap<String, Long> getSoldes() {
+	public Solde getSolde() {
+		
 		logMessage.showLog("Recupération du solde...");
 		
 		HashMap<String, String> responses = makeUSSD(this.validatorUrl + this.soldeSyntaxe);
@@ -124,15 +127,17 @@ public class GSMService {
 		}
 		
 		if(!responses.get(RESPONSE).equals(ERROR)) {
+			
 			String[] results = this.getSoldeByMessage(responses.get(MESSAGE));
 			
-			HashMap<String, Long> soldes = new HashMap<>();
+			Solde solde = Solde.builder()
+								.solde(Long.parseLong(results[0]))
+								.bonus(Long.parseLong(results[1]))
+								.build();
 			
-			soldes.put("solde", Long.parseLong(results[0]));
-			soldes.put("bonus", Long.parseLong(results[1]));
-			soldes.put("total", Long.parseLong(results[2]));
+			logMessage.showLog(solde.toString());
 			
-			return soldes;
+			return solde;
 		}
 		
 		return null;
@@ -142,6 +147,13 @@ public class GSMService {
 		apiRequest.setUrl(syntaxe);
 		HttpResponse<String> httpResponse = apiRequest.send();
 		HashMap<String, String> responses = formatResponseBody(httpResponse.body());
+		return responses;
+	}
+	
+	private HashMap<String, String>  failedTransfert(HashMap<String, String> responses){
+		logMessage.showLog("Transfert echoué :)\n\n");
+		responses.put(RESPONSE, ERROR);
+		responses.put(MESSAGE, null);
 		return responses;
 	}
 

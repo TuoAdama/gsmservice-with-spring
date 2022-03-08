@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,6 +19,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Table(name = "soldes")
 public class Solde {
 
 	@Id
@@ -25,9 +27,11 @@ public class Solde {
 	private Long id;
 	private Long solde;
 	private Long bonus;
-	
-	@Column(nullable = false, insertable = false, updatable = false, 	columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-	private Timestamp createdAt ;
+
+	@Column(nullable = false, insertable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+	private Timestamp createdAt;
 	@Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private Timestamp updateAt;
+
+
 }

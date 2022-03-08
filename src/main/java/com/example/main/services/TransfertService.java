@@ -5,6 +5,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +41,9 @@ public class TransfertService {
 	Validator validator;
 	@Autowired
 	SoldeService soldeService;
+	
+	@Autowired
+	MessageService messageService;
 	
 	@Autowired
 	LogMessage logMessage;
@@ -141,17 +146,23 @@ public class TransfertService {
 			if (responses.get(GSMService.RESPONSE).equals(GSMService.SUCCESS)) {
 
 				ETAT_STATUS = Etat.EXECUTE;
+				transfert.setEtat(etatService.getEtatByName(ETAT_STATUS));
 				
 				String sms = responses.get(GSMService.MESSAGE);
-				Message message = Message.builder().sms(sms).build();
-				
+				System.out.println(sms);
+				Message message = Message
+						.builder()
+						.sms(sms)
+						.build();
+	
 				transfert.setMessage(message);
-				transfert.setReference(sms != null ? gsmService.getReference(sms) : null);
+				transfert.setUpdateAt(Timestamp.valueOf(LocalDateTime.now()));
+				message.setReference(sms != null ? gsmService.getReference(sms) : null);
+				message.setTransfert(transfert);
+				soldeService.updateSolde();
 			}
-
 			transfert.setEtat(etatService.getEtatByName(ETAT_STATUS));
 			transfertRepository.save(transfert);
-
 		});
 	}
 
@@ -161,6 +172,8 @@ public class TransfertService {
 		
 		List<Transfert> transferts = new ArrayList<>();
 
+		
+		
 		etatService.getEtatLoadingOrFailed().forEach(etat -> {
 			transferts.addAll(etat.getTransferts());
 		});
@@ -168,6 +181,10 @@ public class TransfertService {
 		logMessage.showLog(transferts.toString()+"\n");
 		
 		return transferts;
+	}
+	
+	public Transfert store(Transfert transfert) {
+		return transfertRepository.save(transfert);
 	}
 
 }

@@ -8,6 +8,6 @@ import com.example.main.entities.Solde;
 
 @Repository
 public interface SoldeRepository extends JpaRepository<Solde, Long>{
-	@Query(value = "SELECT max(u.id) FROM solde u", nativeQuery = true)
+	@Query(value = "SELECT max(u.id) FROM soldes u", nativeQuery = true)
 	public Long lastId();
 }

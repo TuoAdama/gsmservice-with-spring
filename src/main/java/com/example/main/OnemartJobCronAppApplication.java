@@ -8,19 +8,21 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import com.example.main.entities.Etat;
 import com.example.main.repositories.EtatRepository;
+import com.example.main.repositories.MessageRepository;
 import com.example.main.repositories.SoldeRepository;
+import com.example.main.repositories.TransfertRepository;
 import com.example.main.services.EtatService;
 import com.example.main.services.GSMService;
+import com.example.main.services.MessageService;
+import com.example.main.services.SoldeService;
 import com.example.main.services.TransfertService;
 import com.example.main.utils.LogMessage;
 
 @SpringBootApplication
 @EnableScheduling
-public class OnemartJobCronAppApplication implements CommandLineRunner{
-	
-	
+public class OnemartJobCronAppApplication implements CommandLineRunner {
+
 	@Autowired
 	EtatRepository etatRepo;
 	@Autowired
@@ -31,25 +33,33 @@ public class OnemartJobCronAppApplication implements CommandLineRunner{
 	SoldeRepository soldeRepository;
 	@Autowired
 	GSMService gsmService;
-	
+
 	@Autowired
 	TransfertService transfertService;
-	
+
+	@Autowired
+	MessageService messageService;
+
 	@Autowired
 	LogMessage logMessage;
 	
+	@Autowired
+	TransfertRepository transfertRepository;
+	@Autowired
+	MessageRepository messageRepository;
+	
+	@Autowired
+	SoldeService soldeService;
+
 	public static void main(String[] args) {
 		SpringApplication.run(OnemartJobCronAppApplication.class, args);
 	}
 
 	@Override
 	public void run(String... args) throws Exception {
-		//transfertService.getFailedOrLoadingTransferts().forEach(System.out::println);
-//		Etat etat = etatService.getEtatByName(Etat.EN_COURS);
 		
-		Etat etat = etatService.getEtatByName(Etat.EN_COURS);
-		System.out.println(etat.getTransferts());
-		
+		transfertService.makeTransfert();
+
 	}
 
 }

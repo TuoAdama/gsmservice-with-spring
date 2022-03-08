@@ -10,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -18,15 +19,20 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Table(name = "transferts")
+@ToString(exclude = "message")
 public class Transfert {
 	
 	@Id
+	@NotNull(message = "Identifiant non correct")
+	@Min(value = 0, message = "Identifiant doit être supérieur à 0")
 	private Long id;
 	
 	@Column(nullable = false)
@@ -36,13 +42,11 @@ public class Transfert {
 	
 	@Column(nullable = false)
 	@NotNull
-	@Min(value = 25, message = "Montant non valide")
+	@Min(value = 50, message = "Montant non valide")
 	private Long montant;
 	
-	private String reference;
-	
 	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(nullable = false)
+	@JoinColumn(name="etat_id")
 	private Etat etat;
 	
 	@OneToOne(mappedBy = "transfert", cascade = CascadeType.ALL)
