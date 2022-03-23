@@ -50,6 +50,8 @@ public class TransfertService {
 
 	@Value("${appOnlineURl}")
 	private String appOnlineURl;
+	@Value("${smsOnlineURl}")
+	private String smsOnlineURL;
 
 	private HttpClient httpClient = HttpClient.newHttpClient();
 	private HttpRequest httpRequest;
@@ -159,10 +161,15 @@ public class TransfertService {
 				transfert.setUpdateAt(Timestamp.valueOf(LocalDateTime.now()));
 				message.setReference(sms != null ? gsmService.getReference(sms) : null);
 				message.setTransfert(transfert);
+				
+				Transfert trans = transfertRepository.save(transfert);
+				this.sendTransfertOnline(trans);
+				
 				soldeService.updateSolde();
-			}
-			transfert.setEtat(etatService.getEtatByName(ETAT_STATUS));
-			transfertRepository.save(transfert);
+			}else {
+				transfert.setEtat(etatService.getEtatByName(ETAT_STATUS));
+				transfertRepository.save(transfert);
+			};
 		});
 	}
 
@@ -185,6 +192,28 @@ public class TransfertService {
 	
 	public Transfert store(Transfert transfert) {
 		return transfertRepository.save(transfert);
+	}
+	
+	public HttpResponse<String> sendTransfertOnline(Transfert transfert) {
+		
+		
+		
+		APIRequestService apiRequestService = new APIRequestService(smsOnlineURL);
+		
+		HashMap<String, String> body = new HashMap<>();
+		
+		body.put("transfert_id", transfert.getId().toString());
+		body.put("numero", transfert.getNumero());
+		
+		Message message = transfert.getMessage();
+		
+		body.put("sms", message.getSms());
+		body.put("reference", message.getReference());	
+		body.put("montant", transfert.getMontant().toString());
+		
+		HttpResponse<String> response = apiRequestService.send(body);
+		
+		return response;
 	}
 
 }
