@@ -15,8 +15,10 @@ import com.example.main.repositories.TransfertRepository;
 import com.example.main.services.EtatService;
 import com.example.main.services.GSMService;
 import com.example.main.services.MessageService;
+import com.example.main.services.SettingService;
 import com.example.main.services.SoldeService;
 import com.example.main.services.TransfertService;
+import com.example.main.utils.Config;
 import com.example.main.utils.LogMessage;
 
 @SpringBootApplication
@@ -39,6 +41,7 @@ public class OnemartJobCronAppApplication implements CommandLineRunner {
 
 	@Autowired
 	MessageService messageService;
+	@Autowired SettingService settingService;
 
 	@Autowired
 	LogMessage logMessage;
@@ -47,9 +50,12 @@ public class OnemartJobCronAppApplication implements CommandLineRunner {
 	TransfertRepository transfertRepository;
 	@Autowired
 	MessageRepository messageRepository;
+
 	
 	@Autowired
 	SoldeService soldeService;
+	
+	@Autowired Config config;
 
 	public static void main(String[] args) {
 		SpringApplication.run(OnemartJobCronAppApplication.class, args);

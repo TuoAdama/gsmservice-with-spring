@@ -14,13 +14,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.main.entities.Setting;
 import com.example.main.services.SettingService;
+import com.example.main.utils.Config;
 
 @RestController
 @RequestMapping("/settings")
 public class SettingController {
 	
-	@Autowired
-	SettingService settingService;
+	
+	@Autowired SettingService settingService;
+	@Autowired Config config;
 	
 	@GetMapping
 	private List<Setting> allSettings(){
@@ -29,7 +31,7 @@ public class SettingController {
 	
 	@GetMapping("/key/{key}")
 	public Setting settingByKey(@PathVariable String key) {
-		return settingService.settingKey(key);
+		return settingService.getByKey(key);
 	}
 	
 	@GetMapping("/{id}")
@@ -39,9 +41,11 @@ public class SettingController {
 
 	@PostMapping("/update")
 	public Setting updateSetting(@RequestBody @Valid Setting setting) {
-		return settingService.updateOrSave(setting);
+		Setting set = settingService.updateOrSave(setting);
+		config.updateConfig(set);
+		return set;
 	}
-	
+
 	@PostMapping("/add")
 	private Setting addSetting(@RequestBody @Valid Setting setting) {
 		return settingService.updateOrSave(setting);

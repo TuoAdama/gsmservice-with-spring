@@ -1,32 +1,22 @@
 package com.example.main.controllers;
 
-import java.util.Arrays;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.main.entities.Transfert;
+import com.example.main.services.GSMService;
+import com.example.main.utils.Config;
 
 @RestController
 public class TestController {
 
-	@Value("${syntaxe.transfert}")
-	private String syntaxe;
-	@Value("${validateurURL}")
-	private String validatorUrl;
+	@Autowired Config config;
+	@Autowired GSMService gsmService;
 	
-	@GetMapping("/transferts")
-	private List<Transfert> testData() {
-		
-		Transfert transfert1 = Transfert.builder()
-				.id(1L)
-				.numero("0150388646")
-				.montant(50L)
-				.build();
-		
-		return Arrays.asList(transfert1);
+	@GetMapping("/config")
+	private @ResponseBody Config testData() {
+		return config;
 	}
 	
 }

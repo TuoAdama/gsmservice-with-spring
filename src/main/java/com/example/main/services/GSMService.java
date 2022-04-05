@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.example.main.entities.Solde;
 import com.example.main.entities.Transfert;
+import com.example.main.utils.Config;
 import com.example.main.utils.LogMessage;
 
 @Service
@@ -19,37 +19,30 @@ public class GSMService {
 	public static final String ERROR = "Error";
 	public static final String MESSAGE = "Message";
 	public static final String RESPONSE = "Response";
-
-	@Value("${syntaxe.transfert}")
-	private String syntaxe;
-	@Value("${syntaxe.solde}")
-	private String soldeSyntaxe;
-	@Value("${validateurURL}")
-	private String validatorUrl;
 		
 	@Autowired
 	LogMessage logMessage;
 	
 	@Autowired
 	SoldeService soldeService;
+	@Autowired Config config;
 	
 	private APIRequestService apiRequest = new APIRequestService();
 
 	public HashMap<String, String> makeTransfert(Transfert transfert) {
 		
-		this.syntaxe = this.syntaxe.replaceFirst("NUMERO", transfert.getNumero())
-					.replaceFirst("MONTANT", String.valueOf(transfert.getMontant()));
+		String transfertSyntaxe = this.getSyntaxe(transfert.getNumero(), transfert.getMontant());
 		
 		
 		Solde previousSoldes = this.getSolde();
 		
 		logMessage.showLog("validation du transfert...");
 		
-		HashMap<String, String> responses = makeUSSD(this.validatorUrl + this.syntaxe);
+		HashMap<String, String> responses = makeUSSD(this.config.getGsmURL()+transfertSyntaxe);
 		
 		if(responses.get(MESSAGE).contains("souhaitez-vous continuer @@ cette vente")) {
 			
-			responses = makeUSSD(this.validatorUrl+"1");
+			responses = makeUSSD(this.config.getGsmURL()+"1");
 			
 			if(responses.get(RESPONSE).equals(ERROR)) {
 				return this.failedTransfert(responses);
@@ -115,14 +108,19 @@ public class GSMService {
 	
 	public Solde getSolde() {
 		
+		
+		String soldeSyntaxe = this.getSoldeSyntaxe();
+		
+		String url = this.config.getGsmURL()+soldeSyntaxe;
+		
 		logMessage.showLog("Recupération du solde...");
 		
-		HashMap<String, String> responses = makeUSSD(this.validatorUrl + this.soldeSyntaxe);
+		HashMap<String, String> responses = makeUSSD(url);
 		int essaie = 1;
 		
 		while(responses.get(RESPONSE).equals(ERROR) && essaie < 10) {
 			logMessage.showLog("Recupération echouée ...");
-			responses = makeUSSD(this.validatorUrl + this.soldeSyntaxe);
+			responses = makeUSSD(url);
 			essaie++;
 		}
 		
@@ -143,8 +141,8 @@ public class GSMService {
 		return null;
 	}
 	
-	private HashMap<String, String> makeUSSD(String syntaxe) {
-		apiRequest.setUrl(syntaxe);
+	private HashMap<String, String> makeUSSD(String url) {
+		apiRequest.setUrl(url);
 		HttpResponse<String> httpResponse = apiRequest.send();
 		HashMap<String, String> responses = formatResponseBody(httpResponse.body());
 		return responses;
@@ -156,5 +154,23 @@ public class GSMService {
 		responses.put(MESSAGE, null);
 		return responses;
 	}
-
+	
+	public String getSyntaxe(String numero, Long montant) {
+		
+		String syntaxe = this.config.getTransfertSimpleSyntaxe()
+						.replaceFirst("NUMERO", numero)
+						.replaceFirst("MONTANT", String.valueOf(montant))
+						.replaceFirst("CODE", config.getSecretCode());
+		return this.encodeSyntaxe(syntaxe);
+	}
+	
+	public String encodeSyntaxe(String syntaxe) {
+		return syntaxe
+				.replace("*","%2A")
+				.replace("#", "%23");
+	}
+	
+	public String getSoldeSyntaxe() {
+		return this.encodeSyntaxe(this.config.getSoldeSyntaxe().replaceFirst("CODE_SECRET", this.config.getSecretCode()));
+	}
 }

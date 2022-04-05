@@ -26,7 +26,7 @@ public class SettingService {
 		return settingRepository.findById(id).get();
 	}
 	
-	public Setting settingKey(String name) {
+	public Setting getByKey(String name) {
 		return settingRepository.findBySettingKey(name);
 	}
 	
