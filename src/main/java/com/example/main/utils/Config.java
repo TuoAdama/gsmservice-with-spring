@@ -17,15 +17,6 @@ public class Config {
 	private String smsStorage;
 	private String transfertsOnlineURL;
 	private String soldeSyntaxe;
-	
-	public Config(SettingService settingService) {
-		this.gsmURL = settingService.getByKey("gsm_url").getValue();
-		this.transfertSimpleSyntaxe = settingService.getByKey("transfert_simple_syntaxe").getValue();
-		this.transfertsOnlineURL = settingService.getByKey("transferts_online_url").getValue();
-		this.smsStorage = settingService.getByKey("sms_storage").getValue();
-		this.secretCode = settingService.getByKey("secret_code").getValue();
-		this.soldeSyntaxe = settingService.getByKey("consultation_solde_syntaxe").getValue();
-	}
 
 	public void updateConfig(Setting set) {
 		

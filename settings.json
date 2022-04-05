@@ -1,0 +1,63 @@
+[
+    {
+      "details": "",
+      "display_name": "Transfert",
+      "setting_key": "transfert_simple_syntaxe",
+      "value": "*410*NUMERO*MONTANT*CODE#"
+    },
+    {
+      "details": "",
+      "display_name": "Auto rechargement",
+      "setting_key": "auto_rechargement",
+      "value": "*415*MONTANT*CODE#"
+    },
+    {
+      "details": "",
+      "display_name": "Modification du code de transfert",
+      "setting_key": "modification_code_transfert",
+      "value": "*446*ANCIEN_CODE*NOUVEAU_CODE*NOUVEAU_CODE_CONFIRME#"
+    },
+    {
+      "details": "Consultation du solde",
+      "display_name": "Consultation du solde",
+      "setting_key": "consultation_solde_syntaxe",
+      "value": "*414*CODE_SECRET#"
+    },
+    {
+      "details": "Verification de la dernière transaction",
+      "display_name": "Verification de la dernière transaction",
+      "setting_key": "verification_transaction",
+      "value": "*445*CODE_SECRET#"
+    },
+    {
+      "details": "Transfert EVD ( Master, Instermed )",
+      "display_name": "Transfert EVD ( Master, Instermed )",
+      "setting_key": "transfert_evd",
+      "value": "*413*NUMERO*MONTANT*CODE_SECRET#"
+    },
+    {
+      "details": "",
+      "display_name": "Validateur GSM URL",
+      "setting_key": "gsm_url",
+      "value": "http://192.168.5.150/cgi/WebCGI?1500102=account=apiuser&password=apipass&port=1&content="
+    },
+    {
+      "id": "34",
+      "details": "URL de recupération des transferts",
+      "display_name": "URL de recupération des transferts",
+      "setting_key": "transferts_online_url",
+      "value": "http://www.onemart.tel/api/gsmlist"
+    },
+    {
+      "details": "",
+      "display_name": "URL d'enregistrement des SMS",
+      "setting_key": "sms_storage",
+      "value": "http://localhost:8000/api/AddTransfertAndroid"
+    },
+    {
+      "details": "Le code secret",
+      "display_name": "Code secret",
+      "setting_key": "secret_code",
+      "value": "41253"
+    }
+  ]
