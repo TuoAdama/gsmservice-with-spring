@@ -24,7 +24,6 @@ import com.example.main.repositories.EtatRepository;
 import com.example.main.repositories.MessageRepository;
 import com.example.main.repositories.SoldeRepository;
 import com.example.main.repositories.TransfertRepository;
-import com.example.main.services.APIRequestService;
 import com.example.main.services.EtatService;
 import com.example.main.services.GSMService;
 import com.example.main.services.MessageService;
@@ -76,10 +75,11 @@ public class OnemartJobCronAppApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-//		this.initEtat();
-//		this.initConfig();
+		this.initEtat();
 //		this.transfertService.makeTransfert();
 //		this.transfertService.storeTransferts();
+//		this.transfertService.makeTransfert();
+		this.transfertService.storeTransferts();
 		this.transfertService.makeTransfert();
 	}
 	
@@ -114,15 +114,6 @@ public class OnemartJobCronAppApplication implements CommandLineRunner {
 			
 		}
 		
-	}
-	
-	private void initConfig() {
-		this.config.setGsmURL(settingService.getByKey("gsm_url").getValue());
-		this.config.setTransfertSimpleSyntaxe(settingService.getByKey("transfert_simple_syntaxe").getValue());
-		this.config.setTransfertsOnlineURL(settingService.getByKey("transferts_online_url").getValue());
-		this.config.setSmsStorage(settingService.getByKey("sms_storage").getValue());
-		this.config.setSecretCode(settingService.getByKey("secret_code").getValue());
-		this.config.setSoldeSyntaxe(settingService.getByKey("consultation_solde_syntaxe").getValue());		
 	}
 	
 	private void initEtat() {

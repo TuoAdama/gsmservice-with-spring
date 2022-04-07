@@ -1,9 +1,9 @@
 package com.example.main.utils;
 
+import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 
-import com.example.main.entities.Setting;
-import com.example.main.services.SettingService;
+import com.example.main.services.APIRequestService;
 
 import lombok.Data;
 
@@ -11,35 +11,36 @@ import lombok.Data;
 @Data
 public class Config {
 	
-	private String gsmURL;
-	private String transfertSimpleSyntaxe;
-	private String secretCode;
-	private String smsStorage;
-	private String transfertsOnlineURL;
+	private String gsmURL = "http://192.168.5.150/cgi/WebCGI?1500102=account=apiuser&password=apipass&port=1&content=";
+	private String smsStorage = "http://localhost:8000/api/AddTransfertAndroid";
+	private String appOnlineURL = "http://localhost:8000/api/gsmlist";
+	private String syntaxeSoldeURL = "http://localhost:8000/api/soldeSyntaxe";
+	private String syntaxeTransfertURL = "http://localhost:8000/api/simpleTransfertSyntaxe";
 	private String soldeSyntaxe;
-
-	public void updateConfig(Setting set) {
-		
-		String settingKey = set.getSettingKey();;
-		
-		switch (settingKey) {
-		case "transfert_simple_syntaxe":
-			this.transfertSimpleSyntaxe = set.getValue();
-			break;
-		case "secret_code":
-			this.secretCode = set.getValue();
-			break;
-		case "transferts_online_url":
-			this.secretCode = set.getValue();
-			break;
-		case "gsm_url":
-			this.gsmURL = set.getValue();
-			break;
-		case "sms_storage":
-			this.smsStorage = set.getValue();
-			break;
-		}
-		
+	private String transfertSimpleSyntaxe;
+	
+	public Config(){
+		this.initConfig();
+	}
+	
+	public void initConfig() {
+		this.soldeSyntaxe = this.getSyntaxeSoldeURLOnline();
+		this.transfertSimpleSyntaxe = this.getSyntaxeTransfertURLOnline();
+	}
+	
+	public String getSyntaxeSoldeURLOnline() {
+		return this.getSyntaxeOnline(this.syntaxeSoldeURL);
+	}
+	
+	public String getSyntaxeTransfertURLOnline() {
+		return this.getSyntaxeOnline(this.syntaxeTransfertURL);	
+	}
+	
+	private String getSyntaxeOnline(String url) {
+		APIRequestService apiRequest = new APIRequestService();
+		apiRequest.setUrl(url);
+		JSONObject ob = new JSONObject(apiRequest.send().body());
+		return ob.getString("syntaxe");
 	}
 	
 }

@@ -4,9 +4,7 @@ import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.example.main.entities.Solde;
@@ -21,34 +19,28 @@ public class GSMService {
 	public static final String ERROR = "Error";
 	public static final String MESSAGE = "Message";
 	public static final String RESPONSE = "Response";
-	
-	
-	@Value("${validateurURL}")
-	private String validateurURL;
 		
-	@Autowired
-	LogMessage logMessage;
-	
-	@Autowired
-	SoldeService soldeService;
+	@Autowired LogMessage logMessage;
+	@Autowired SoldeService soldeService;
 	@Autowired Config config;
 	
 	private APIRequestService apiRequest = new APIRequestService();
 
 	public HashMap<String, String> makeTransfert(Transfert transfert) {
 		
-		String transfertSyntaxe = this.encodeSyntaxe(transfert.getSyntaxe());
-		System.out.println(this.validateurURL+transfertSyntaxe);
+		String transfertSyntaxe = this.formatTranfertSyntaxe(transfert.getNumero(), transfert.getMontant());
+		
+		System.out.println(this.config.getGsmURL()+transfertSyntaxe);
 		
 		Solde previousSoldes = this.getSolde();
 		
 		logMessage.showLog("validation du transfert...");
 		
-		HashMap<String, String> responses = makeUSSD(this.validateurURL+transfertSyntaxe);
+		HashMap<String, String> responses = makeUSSD(this.config.getGsmURL()+transfertSyntaxe);
 		
 		if(responses.get(MESSAGE).contains("souhaitez-vous continuer @@ cette vente")) {
 			
-			responses = makeUSSD(this.validateurURL+"1");
+			responses = makeUSSD(this.config.getGsmURL()+"1");
 			
 			if(responses.get(RESPONSE).equals(ERROR)) {
 				return this.failedTransfert(responses);
@@ -110,14 +102,9 @@ public class GSMService {
 		return soldes;
 	}
 	
-	
-	
 	public Solde getSolde() {
 		
-		
-		String soldeSyntaxe = this.getSoldeSyntaxe();
-		
-		String url = this.validateurURL+soldeSyntaxe;
+		String url = this.config.getGsmURL()+ this.getSoldeSyntaxe();
 		
 		logMessage.showLog("Recupération du solde...");
 		
@@ -167,11 +154,13 @@ public class GSMService {
 				.replace("#", "%23");
 	}
 	
+	public String formatTranfertSyntaxe(String numero, Long montant) {
+		String format = this.config.getTransfertSimpleSyntaxe().replaceAll("NUMERO", numero)
+		.replaceAll("MONTANT", String.valueOf(montant));
+		return this.encodeSyntaxe(format);
+	}
+	
 	public String getSoldeSyntaxe() {
-		
-		APIRequestService req = new APIRequestService("http://localhost:8000/api/soldeSyntaxe");
-		JSONObject obj = new JSONObject(req.send().body());
-		
-		return this.encodeSyntaxe(obj.getString("syntaxe"));
+		return this.encodeSyntaxe(this.config.getSoldeSyntaxe());
 	}
 }

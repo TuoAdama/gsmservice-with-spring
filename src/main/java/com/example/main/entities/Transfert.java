@@ -52,9 +52,6 @@ public class Transfert {
 	@OneToOne(mappedBy = "transfert", cascade = CascadeType.ALL)
 	private Message message;
 	
-	@NotNull(message = "Syntaxe ne peut être null")
-	private String syntaxe;
-	
 	@Column(nullable = false, insertable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private Timestamp createdAt ;
 	@Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")

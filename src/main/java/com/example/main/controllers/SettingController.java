@@ -42,7 +42,6 @@ public class SettingController {
 	@PostMapping("/update")
 	public Setting updateSetting(@RequestBody @Valid Setting setting) {
 		Setting set = settingService.updateOrSave(setting);
-		config.updateConfig(set);
 		return set;
 	}
 

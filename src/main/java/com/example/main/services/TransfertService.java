@@ -26,32 +26,20 @@ import com.example.main.entities.Etat;
 import com.example.main.entities.Message;
 import com.example.main.entities.Transfert;
 import com.example.main.repositories.TransfertRepository;
+import com.example.main.utils.Config;
 import com.example.main.utils.LogMessage;
 
 @Service
 public class TransfertService {
 
-	@Autowired
-	TransfertRepository transfertRepository;
-	@Autowired
-	EtatService etatService;
-	@Autowired
-	GSMService gsmService;
-	@Autowired
-	Validator validator;
-	@Autowired
-	SoldeService soldeService;
-	
-	@Autowired
-	MessageService messageService;
-	
-	@Autowired
-	LogMessage logMessage;
-
-	@Value("${appOnlineURl}")
-	private String appOnlineURl;
-	@Value("${smsOnlineURl}")
-	private String smsOnlineURL;
+	@Autowired TransfertRepository transfertRepository;
+	@Autowired EtatService etatService;
+	@Autowired GSMService gsmService;
+	@Autowired Validator validator;
+	@Autowired SoldeService soldeService;
+	@Autowired MessageService messageService;
+	@Autowired LogMessage logMessage;
+	@Autowired Config config;
 
 	private HttpClient httpClient = HttpClient.newHttpClient();
 	private HttpRequest httpRequest;
@@ -60,7 +48,7 @@ public class TransfertService {
 
 		JSONArray responseToJSon = new JSONArray();
 
-		httpRequest = HttpRequest.newBuilder().uri(URI.create(appOnlineURl)).build();
+		httpRequest = HttpRequest.newBuilder().uri(URI.create(this.config.getAppOnlineURL())).build();
 
 		logMessage.showLog("Recuperation en ligne des transferts...");
 		try {
@@ -99,7 +87,6 @@ public class TransfertService {
 					.numero(item.getString("numero"))
 					.montant(item.getLong("montant"))
 					.etat(etatService.getEtatByName(Etat.EN_COURS))
-					.syntaxe(item.getString("syntaxe"))
 					.build();
 			
 			logMessage.showLog("Enregistrement du transfert : "+transfert.toString());
@@ -199,9 +186,7 @@ public class TransfertService {
 	
 	public HttpResponse<String> sendTransfertOnline(Transfert transfert) {
 		
-		
-		
-		APIRequestService apiRequestService = new APIRequestService(smsOnlineURL);
+		APIRequestService apiRequestService = new APIRequestService(this.config.getSmsStorage());
 		
 		HashMap<String, String> body = new HashMap<>();
 		
