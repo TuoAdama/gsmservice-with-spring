@@ -18,11 +18,13 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import com.example.main.entities.Etat;
 import com.example.main.entities.Setting;
 import com.example.main.repositories.EtatRepository;
 import com.example.main.repositories.MessageRepository;
 import com.example.main.repositories.SoldeRepository;
 import com.example.main.repositories.TransfertRepository;
+import com.example.main.services.APIRequestService;
 import com.example.main.services.EtatService;
 import com.example.main.services.GSMService;
 import com.example.main.services.MessageService;
@@ -74,8 +76,11 @@ public class OnemartJobCronAppApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-		this.storeSettings();
-		this.initConfig();
+//		this.initEtat();
+//		this.initConfig();
+//		this.transfertService.makeTransfert();
+//		this.transfertService.storeTransferts();
+		this.transfertService.makeTransfert();
 	}
 	
 	public void storeSettings() throws IOException {
@@ -118,6 +123,18 @@ public class OnemartJobCronAppApplication implements CommandLineRunner {
 		this.config.setSmsStorage(settingService.getByKey("sms_storage").getValue());
 		this.config.setSecretCode(settingService.getByKey("secret_code").getValue());
 		this.config.setSoldeSyntaxe(settingService.getByKey("consultation_solde_syntaxe").getValue());		
+	}
+	
+	private void initEtat() {
+		
+		String[] etats = {"EN COURS", "EXECUTE", "ECHOUE"};
+		
+		for (String etat : etats) {
+			if(etatService.getEtatByName(etat) == null) {
+				etatService.updateOrSave(Etat.builder().name(etat).build());
+			}
+		}
+		
 	}
 
 }

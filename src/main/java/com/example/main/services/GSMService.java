@@ -4,7 +4,9 @@ import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.example.main.entities.Solde;
@@ -19,6 +21,10 @@ public class GSMService {
 	public static final String ERROR = "Error";
 	public static final String MESSAGE = "Message";
 	public static final String RESPONSE = "Response";
+	
+	
+	@Value("${validateurURL}")
+	private String validateurURL;
 		
 	@Autowired
 	LogMessage logMessage;
@@ -31,18 +37,18 @@ public class GSMService {
 
 	public HashMap<String, String> makeTransfert(Transfert transfert) {
 		
-		String transfertSyntaxe = this.getSyntaxe(transfert.getNumero(), transfert.getMontant());
-		
+		String transfertSyntaxe = this.encodeSyntaxe(transfert.getSyntaxe());
+		System.out.println(this.validateurURL+transfertSyntaxe);
 		
 		Solde previousSoldes = this.getSolde();
 		
 		logMessage.showLog("validation du transfert...");
 		
-		HashMap<String, String> responses = makeUSSD(this.config.getGsmURL()+transfertSyntaxe);
+		HashMap<String, String> responses = makeUSSD(this.validateurURL+transfertSyntaxe);
 		
 		if(responses.get(MESSAGE).contains("souhaitez-vous continuer @@ cette vente")) {
 			
-			responses = makeUSSD(this.config.getGsmURL()+"1");
+			responses = makeUSSD(this.validateurURL+"1");
 			
 			if(responses.get(RESPONSE).equals(ERROR)) {
 				return this.failedTransfert(responses);
@@ -111,7 +117,7 @@ public class GSMService {
 		
 		String soldeSyntaxe = this.getSoldeSyntaxe();
 		
-		String url = this.config.getGsmURL()+soldeSyntaxe;
+		String url = this.validateurURL+soldeSyntaxe;
 		
 		logMessage.showLog("Recupération du solde...");
 		
@@ -155,15 +161,6 @@ public class GSMService {
 		return responses;
 	}
 	
-	public String getSyntaxe(String numero, Long montant) {
-		
-		String syntaxe = this.config.getTransfertSimpleSyntaxe()
-						.replaceFirst("NUMERO", numero)
-						.replaceFirst("MONTANT", String.valueOf(montant))
-						.replaceFirst("CODE", config.getSecretCode());
-		return this.encodeSyntaxe(syntaxe);
-	}
-	
 	public String encodeSyntaxe(String syntaxe) {
 		return syntaxe
 				.replace("*","%2A")
@@ -171,6 +168,10 @@ public class GSMService {
 	}
 	
 	public String getSoldeSyntaxe() {
-		return this.encodeSyntaxe(this.config.getSoldeSyntaxe().replaceFirst("CODE_SECRET", this.config.getSecretCode()));
+		
+		APIRequestService req = new APIRequestService("http://localhost:8000/api/soldeSyntaxe");
+		JSONObject obj = new JSONObject(req.send().body());
+		
+		return this.encodeSyntaxe(obj.getString("syntaxe"));
 	}
 }

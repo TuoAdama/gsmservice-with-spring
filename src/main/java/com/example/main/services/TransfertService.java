@@ -65,6 +65,7 @@ public class TransfertService {
 		logMessage.showLog("Recuperation en ligne des transferts...");
 		try {
 			HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+			System.out.println(response.body());
 			responseToJSon = new JSONArray(response.body());
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
@@ -91,12 +92,14 @@ public class TransfertService {
 		for (int i = 0; i < transferts.length(); i++) {
 
 			JSONObject item = transferts.getJSONObject(i);
+			System.out.println(item);
 
 			transfert = Transfert.builder()
 					.id(item.getLong("id"))
 					.numero(item.getString("numero"))
 					.montant(item.getLong("montant"))
 					.etat(etatService.getEtatByName(Etat.EN_COURS))
+					.syntaxe(item.getString("syntaxe"))
 					.build();
 			
 			logMessage.showLog("Enregistrement du transfert : "+transfert.toString());

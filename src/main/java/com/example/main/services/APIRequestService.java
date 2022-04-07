@@ -14,13 +14,12 @@ public class APIRequestService {
 	
 	private String url;
 	HttpRequest httpRequest;
-	HttpClient httpClient;
+	HttpClient httpClient = HttpClient.newHttpClient();
 	
 	public APIRequestService() {}
 	
 	public APIRequestService(String url) {
 		this.url = url;
-		this.httpClient = HttpClient.newHttpClient();
 	}
 	
 	

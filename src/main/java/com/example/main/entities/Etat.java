@@ -13,7 +13,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -22,6 +25,9 @@ import lombok.ToString;
 @Setter
 @ToString(exclude = "transferts")
 @Table(name = "etats")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Etat {
 	
 	@Transient

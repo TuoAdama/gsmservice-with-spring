@@ -43,5 +43,9 @@ public class EtatService {
 	public List<Etat> findAllEtat() {
 		return etatRepository.findAll();
 	}
+	
+	public Etat updateOrSave(Etat etat) {
+		return etatRepository.save(etat);
+	}
 
 }
