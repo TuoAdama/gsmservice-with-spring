@@ -80,7 +80,7 @@ public class OnemartJobCronAppApplication implements CommandLineRunner {
 //		this.transfertService.storeTransferts();
 //		this.transfertService.makeTransfert();
 		//this.transfertService.storeTransferts();
-		//this.transfertService.makeTransfert();
+		this.transfertService.makeTransfert();
 	}
 	
 	public void storeSettings() throws IOException {
