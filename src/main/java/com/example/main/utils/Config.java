@@ -15,7 +15,7 @@ public class Config {
 	private String smsStorage = "http://localhost:8000/api/AddTransfertAndroid";
 	private String appOnlineURL = "http://localhost:8000/api/gsmlist";
 	private String syntaxeSoldeURL = "http://localhost:8000/api/soldeSyntaxe";
-	private String syntaxeTransfertURL = "http://localhost:8000/api/simpleTransfertSyntaxe";
+	private String syntaxeTransfertURL = "http://localhost:8000/api/transfertCabineSyntaxe";
 	private String soldeSyntaxe;
 	private String transfertSimpleSyntaxe;
 	
