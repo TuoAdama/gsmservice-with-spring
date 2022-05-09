@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.main.entities.Setting;
 import com.example.main.services.SettingService;
+import com.example.main.services.SoldeService;
 import com.example.main.utils.Config;
 
 @Controller
@@ -25,9 +26,11 @@ public class SettingController {
 	
 	@Autowired SettingService settingService;
 	@Autowired Config config;
+	@Autowired SoldeService soldeService;
 	
 	@GetMapping("/index")
-	private String index(){
+	private String index(Model model){
+		model.addAttribute("soldes", soldeService.findAll());
 		return "index";
 	}
 	
