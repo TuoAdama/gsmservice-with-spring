@@ -28,7 +28,11 @@ import com.example.main.repositories.TransfertRepository;
 import com.example.main.utils.Config;
 import com.example.main.utils.LogMessage;
 
+import lombok.extern.java.Log;
+
+
 @Service
+
 public class TransfertService {
 
 	@Autowired TransfertRepository transfertRepository;
@@ -50,6 +54,7 @@ public class TransfertService {
 		httpRequest = HttpRequest.newBuilder().uri(URI.create(this.config.getAppOnlineURL())).build();
 
 		logMessage.showLog("Recuperation en ligne des transferts...");
+
 		try {
 			HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
 			System.out.println(response.body());

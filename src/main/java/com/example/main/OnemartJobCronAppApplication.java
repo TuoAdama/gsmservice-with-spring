@@ -76,11 +76,11 @@ public class OnemartJobCronAppApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 		this.initEtat();
-//		this.transfertService.makeTransfert();
-//		this.transfertService.storeTransferts();
+		//this.transfertService.makeTransfert();
+		//this.transfertService.storeTransferts();
 //		this.transfertService.makeTransfert();
 		//this.transfertService.storeTransferts();
-		this.transfertService.makeTransfert();
+		//this.transfertService.makeTransfert();
 	}
 	
 	public void storeSettings() throws IOException {
