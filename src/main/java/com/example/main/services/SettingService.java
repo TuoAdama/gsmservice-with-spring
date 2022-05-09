@@ -26,8 +26,14 @@ public class SettingService {
 		return settingRepository.findById(id).get();
 	}
 	
-	public Setting getByKey(String name) {
-		return settingRepository.findBySettingKey(name);
+	public Setting findByKey(String name) {
+		return settingRepository.findByKey(name);
+	}
+
+	public void update(String key, String value) {
+		Setting s = this.findByKey(key);
+		s.setValue(value);
+		this.updateOrSave(s);
 	}
 	
 }

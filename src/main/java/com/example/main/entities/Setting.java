@@ -11,6 +11,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -19,6 +20,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "settings")
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Setting {
 	
 	@Id
@@ -27,16 +29,14 @@ public class Setting {
 	
 	@NotNull(message = "veuillez preciser la clé du paramètre")
 	@Column(name = "setting_key", unique = true)
-	private String settingKey;
+	private String key;
 	
 	@NotNull(message = "L'attribut display_name ne peut être null")
-	@Column(name = "display_name", unique = true)
-	private String displayName;
+	@Column(unique = true)
+	private String display;
 	
 	@NotNull(message = "La valeur du paramètre ne peut être null")
 	private String value;
-	
-	private String details;
 	
 	@Column(name = "created_at", nullable = false, insertable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private Timestamp createdAt;

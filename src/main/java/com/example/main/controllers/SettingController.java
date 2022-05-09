@@ -2,8 +2,6 @@ package com.example.main.controllers;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import javax.validation.Valid;
@@ -17,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.example.main.entities.ConfigItem;
 import com.example.main.entities.Setting;
 import com.example.main.services.SettingService;
 import com.example.main.utils.Config;
@@ -29,22 +26,20 @@ public class SettingController {
 	@Autowired SettingService settingService;
 	@Autowired Config config;
 	
-	@GetMapping("/settings")
+	@GetMapping("/index")
 	private String index(){
 		return "index";
 	}
 	
 	@GetMapping("/")
 	private String allSettings(Model settings){
-		
-		settings.addAttribute("settings", this.getConfigItems());
-		
+		settings.addAttribute("settings", this.settingService.allSettings());
 		return "config";
 	}
 	
 	@GetMapping("/key/{key}")
 	public Setting settingByKey(@PathVariable String key) {
-		return settingService.getByKey(key);
+		return settingService.findByKey(key);
 	}
 	
 	@GetMapping("/{id}")
@@ -53,16 +48,30 @@ public class SettingController {
 	}
 
 	@PostMapping("settings/update")
-	public String updateSetting(@RequestParam Map<String, String> params) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public String updateSetting(@RequestParam Map<String, String> params){
 		String key = params.get("key");
 		String value = params.get("value");
 		key = key.substring(0, 1).toUpperCase()+ key.substring(1);
 		
 		System.out.println("set"+key);
 		
-		Method setMethodName = config.getClass().getMethod("set"+key, String.class);
+		Method methodName;
+		try {
+			methodName = config.getClass().getMethod("set"+key, String.class);
+			methodName.invoke(config, value);
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		}
 		
-		setMethodName.invoke(config, value);
+		settingService.update(key,value);
 		
 		return "redirect:/";
 	}
@@ -70,17 +79,5 @@ public class SettingController {
 	@PostMapping("/add")
 	private Setting addSetting(@RequestBody @Valid Setting setting) {
 		return settingService.updateOrSave(setting);
-	}
-	
-	private List<ConfigItem> getConfigItems(){
-		List<ConfigItem> configItems = new ArrayList<>();
-		configItems.add(new ConfigItem("gsmURL", config.getGsmURL(), "GSM URL"));
-		configItems.add(new ConfigItem("smsStorage", config.getSmsStorage(), "SMS URL"));
-		configItems.add(new ConfigItem("appOnlineURL", config.getAppOnlineURL(), "APP ONLINE URL"));
-		configItems.add(new ConfigItem("syntaxeSoldeURL", config.getSyntaxeSoldeURL(), "Syntaxe Solde URL"));
-		configItems.add(new ConfigItem("syntaxeTransfertURL", config.getSmsStorage(), "Transfert URL"));
-		configItems.add(new ConfigItem("syntaxeTransfertURL", config.getSmsStorage(), "Transfert URL"));
-		
-		return configItems;
 	}
 }

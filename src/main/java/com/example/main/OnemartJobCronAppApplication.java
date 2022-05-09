@@ -2,6 +2,8 @@ package com.example.main;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -76,6 +78,8 @@ public class OnemartJobCronAppApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 		this.initEtat();
+		this.initSettings();
+		this.initConfiguration();
 		//this.transfertService.makeTransfert();
 		//this.transfertService.storeTransferts();
 //		this.transfertService.makeTransfert();
@@ -99,14 +103,13 @@ public class OnemartJobCronAppApplication implements CommandLineRunner {
 		for (int i = 0; i < jsonArray.length(); i++) {
 			JSONObject obj = jsonArray.getJSONObject(i);
 			
-			Setting setting = settingService.getByKey(obj.getString("setting_key"));
+			Setting setting = settingService.findByKey(obj.getString("setting_key"));
 			
 			if (setting == null) {
 				
 				setting = new Setting();
-				setting.setDetails(obj.getString("details"));
-				setting.setDisplayName(obj.getString("display_name"));
-				setting.setSettingKey(obj.getString("setting_key"));
+				setting.setDisplay(obj.getString("display_name"));
+				setting.setKey(obj.getString("setting_key"));
 				setting.setValue(obj.getString("value"));
 				
 				settingService.updateOrSave(setting);
@@ -125,6 +128,61 @@ public class OnemartJobCronAppApplication implements CommandLineRunner {
 				etatService.updateOrSave(Etat.builder().name(etat).build());
 			}
 		}
+		
+	}
+	
+	private void initSettings() {
+		
+		String[][] settingsValue = {
+				{"gsmURL", "http://192.168.5.150/cgi/WebCGI?1500102=account=apiuser&password=apipass&port=1&content=", "GSM URL"},
+				{"smsStorage", "http://localhost:8000/api/AddTransfertAndroid", "SMS STORAGE"},
+				{"appOnlineURL", "http://localhost:8000/api/gsmlist", "APP ONLINE URL"},
+				{"syntaxeSoldeURL", "http://localhost:8000/api/soldeSyntaxe", "Get syntaxe URL"},
+				{"syntaxeTransfertURL","http://localhost:8000/api/transfertCabineSyntaxe","Transfert syntaxe URL"},
+		};
+		
+		Setting s;
+
+		for (String[] item : settingsValue) {
+			
+			String key = item[0];
+			if(settingService.findByKey(key) == null) {
+				s = Setting.builder()
+						.key(key)
+						.value(item[1])
+						.display(item[2])
+						.build();
+				settingService.updateOrSave(s);
+			}
+		}
+		
+	}
+	
+	private void initConfiguration(){
+		List<Setting> settings = settingService.allSettings();
+		String key;
+		String value;
+		
+		for(Setting item : settings) {
+			key = item.getKey();
+			value = item.getValue();
+			String methodName = "set"+key.substring(0, 1).toUpperCase()+key.substring(1);
+			Method method;
+			try {
+				method = config.getClass().getMethod(methodName, String.class);
+				method.invoke(config, value);
+			} catch (NoSuchMethodException | SecurityException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		config.initConfig();
 		
 	}
 

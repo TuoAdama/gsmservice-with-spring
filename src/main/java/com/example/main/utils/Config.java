@@ -11,17 +11,13 @@ import lombok.Data;
 @Data
 public class Config {
 	
-	private String gsmURL = "http://192.168.5.150/cgi/WebCGI?1500102=account=apiuser&password=apipass&port=1&content=";
-	private String smsStorage = "http://localhost:8000/api/AddTransfertAndroid";
-	private String appOnlineURL = "http://localhost:8000/api/gsmlist";
-	private String syntaxeSoldeURL = "http://localhost:8000/api/soldeSyntaxe";
-	private String syntaxeTransfertURL = "http://localhost:8000/api/transfertCabineSyntaxe";
+	private String gsmURL;
+	private String smsStorage;
+	private String appOnlineURL;
+	private String syntaxeSoldeURL;
+	private String syntaxeTransfertURL;
 	private String soldeSyntaxe;
 	private String transfertSimpleSyntaxe;
-	
-	public Config(){
-		this.initConfig();
-	}
 	
 	public void initConfig() {
 		this.soldeSyntaxe = this.getSyntaxeSoldeURLOnline();
@@ -42,5 +38,4 @@ public class Config {
 		JSONObject ob = new JSONObject(apiRequest.send().body());
 		return ob.getString("syntaxe");
 	}
-	
 }

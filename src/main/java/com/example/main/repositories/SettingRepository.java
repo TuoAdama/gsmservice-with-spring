@@ -7,5 +7,5 @@ import com.example.main.entities.Setting;
 
 @Repository
 public interface SettingRepository extends JpaRepository<Setting, Long>{
-	public Setting findBySettingKey(String name);
+	public Setting findByKey(String name);
 }
