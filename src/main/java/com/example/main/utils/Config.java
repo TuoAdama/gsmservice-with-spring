@@ -18,6 +18,9 @@ public class Config {
 	private String syntaxeTransfertURL;
 	private String soldeSyntaxe;
 	private String transfertSimpleSyntaxe;
+
+	private String executionTimeMakeTransfert = "3000";
+	private String executionTimeStoreTransfert = "4000";
 	
 	public void initConfig() {
 		this.soldeSyntaxe = this.getSyntaxeSoldeURLOnline();

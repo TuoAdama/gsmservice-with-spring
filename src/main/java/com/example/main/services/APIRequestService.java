@@ -33,9 +33,7 @@ public class APIRequestService {
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}
-		
 		return response;
-		
 	}
 	
 	public HttpResponse<String> send(HashMap<String, String> body){

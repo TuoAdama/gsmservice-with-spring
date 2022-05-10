@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,6 +22,7 @@ import com.example.main.services.SoldeService;
 import com.example.main.utils.Config;
 
 @Controller
+@Slf4j
 public class SettingController {
 	
 	
@@ -54,10 +56,17 @@ public class SettingController {
 	public String updateSetting(@RequestParam Map<String, String> params){
 		String key = params.get("key");
 		String value = params.get("value");
+		this.updateConfig(key, value);
+		return "redirect:/";
+	}
+
+	@PostMapping("/add")
+	private Setting addSetting(@RequestBody @Valid Setting setting) {
+		return settingService.updateOrSave(setting);
+	}
+
+	private void updateConfig(String key, String value){
 		key = key.substring(0, 1).toUpperCase()+ key.substring(1);
-		
-		System.out.println("set"+key);
-		
 		Method methodName;
 		try {
 			methodName = config.getClass().getMethod("set"+key, String.class);
@@ -73,14 +82,6 @@ public class SettingController {
 		} catch (InvocationTargetException e) {
 			e.printStackTrace();
 		}
-		
 		settingService.update(key,value);
-		
-		return "redirect:/";
-	}
-
-	@PostMapping("/add")
-	private Setting addSetting(@RequestBody @Valid Setting setting) {
-		return settingService.updateOrSave(setting);
 	}
 }

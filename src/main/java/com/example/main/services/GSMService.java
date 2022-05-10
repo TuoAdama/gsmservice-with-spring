@@ -4,6 +4,7 @@ import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,14 +14,13 @@ import com.example.main.utils.Config;
 import com.example.main.utils.LogMessage;
 
 @Service
+@Slf4j
 public class GSMService {
 
 	public static final String SUCCESS = "Success";
 	public static final String ERROR = "Error";
 	public static final String MESSAGE = "Message";
 	public static final String RESPONSE = "Response";
-		
-	@Autowired LogMessage logMessage;
 	@Autowired SoldeService soldeService;
 	@Autowired Config config;
 	
@@ -34,7 +34,7 @@ public class GSMService {
 		
 		Solde previousSoldes = this.getSolde();
 		
-		logMessage.showLog("validation du transfert...");
+		log.info("validation du transfert...");
 		
 		HashMap<String, String> responses = makeUSSD(this.config.getGsmURL()+transfertSyntaxe);
 		
@@ -56,7 +56,7 @@ public class GSMService {
 			if(soldesExists && soldeService.soldeIschange(previousSoldes, currentSoldes)) {
 				responses.put(MESSAGE, null);
 				responses.put(RESPONSE, SUCCESS);
-				logMessage.showLog("Transfert validé !\n\n");
+				log.info("Transfert validé !\n\n");
 				return responses;
 			}
 			
@@ -67,7 +67,7 @@ public class GSMService {
 			return this.failedTransfert(responses);
 		}
 		
-		logMessage.showLog("Transfert validé !\n\n");
+		log.info("Transfert validé !\n\n");
 		
 		return responses;
 	}
@@ -106,13 +106,13 @@ public class GSMService {
 		
 		String url = this.config.getGsmURL()+ this.getSoldeSyntaxe();
 		
-		logMessage.showLog("Recupération du solde...");
+		log.info("Recupération du solde...");
 		
 		HashMap<String, String> responses = makeUSSD(url);
 		int essaie = 1;
 		
 		while(responses.get(RESPONSE).equals(ERROR) && essaie < 10) {
-			logMessage.showLog("Recupération echouée ...");
+			log.info("Recupération echouée ...");
 			responses = makeUSSD(url);
 			essaie++;
 		}
@@ -126,7 +126,7 @@ public class GSMService {
 								.bonus(Long.parseLong(results[1]))
 								.build();
 			
-			logMessage.showLog(solde.toString());
+			log.info(solde.toString());
 			
 			return solde;
 		}
@@ -142,7 +142,7 @@ public class GSMService {
 	}
 	
 	private HashMap<String, String>  failedTransfert(HashMap<String, String> responses){
-		logMessage.showLog("Transfert echoué :)\n\n");
+		log.info("Transfert echoué :)\n\n");
 		responses.put(RESPONSE, ERROR);
 		responses.put(MESSAGE, null);
 		return responses;

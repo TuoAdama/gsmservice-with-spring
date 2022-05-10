@@ -33,5 +33,4 @@ public class Solde {
 	@Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private Timestamp updateAt;
 
-
 }

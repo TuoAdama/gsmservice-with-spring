@@ -16,9 +16,11 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.example.main.entities.Etat;
@@ -32,7 +34,7 @@ import lombok.extern.java.Log;
 
 
 @Service
-
+@Slf4j
 public class TransfertService {
 
 	@Autowired TransfertRepository transfertRepository;
@@ -40,8 +42,6 @@ public class TransfertService {
 	@Autowired GSMService gsmService;
 	@Autowired Validator validator;
 	@Autowired SoldeService soldeService;
-	@Autowired MessageService messageService;
-	@Autowired LogMessage logMessage;
 	@Autowired Config config;
 
 	private HttpClient httpClient = HttpClient.newHttpClient();
@@ -53,7 +53,7 @@ public class TransfertService {
 
 		httpRequest = HttpRequest.newBuilder().uri(URI.create(this.config.getAppOnlineURL())).build();
 
-		logMessage.showLog("Recuperation en ligne des transferts...");
+		log.info("Recuperation en ligne des transferts...");
 
 		try {
 			HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
@@ -62,7 +62,6 @@ public class TransfertService {
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}
-
 		return responseToJSon;
 	}
 
@@ -74,10 +73,10 @@ public class TransfertService {
 	public void storeTransferts() {
 		
 		JSONArray transferts = this.getTransfertOnline();
-		logMessage.showLog(transferts.toString()+"\n");
+		log.info(transferts.toString()+"\n");
 		
 
-		logMessage.showLog("Enregistrement des transferts dans la base de données...\n");
+		log.info("Enregistrement des transferts dans la base de données...\n");
 
 		Transfert transfert;
 
@@ -93,7 +92,7 @@ public class TransfertService {
 					.etat(etatService.getEtatByName(Etat.EN_COURS))
 					.build();
 			
-			logMessage.showLog("Enregistrement du transfert : "+transfert.toString());
+			log.info("Enregistrement du transfert : "+transfert.toString());
 
 			Set<ConstraintViolation<Transfert>> violations = validator.validate(transfert);
 		
@@ -102,7 +101,7 @@ public class TransfertService {
 				violations.stream().forEach(violation -> {
 					String value = violation.getInvalidValue().toString();
 					String message = violation.getMessage();
-					logMessage.showLog(message + ": " + value+"\n");
+					log.info(message + ": " + value+"\n");
 				});
 				continue;
 			}
@@ -115,10 +114,10 @@ public class TransfertService {
 				message = "transfert enregistré\n";
 			}
 			
-			logMessage.showLog(message);
+			log.info(message);
 		}
 
-		logMessage.showLog("Enregistrements terminés");
+		log.info("Enregistrements terminés");
 
 	}
 
@@ -133,7 +132,7 @@ public class TransfertService {
 
 		transferts.forEach(transfert -> {
 			
-			logMessage.showLog(transfert.toString());
+			log.info(transfert.toString());
 			
 			String ETAT_STATUS = Etat.ECHOUE;
 
@@ -169,7 +168,7 @@ public class TransfertService {
 
 	public List<Transfert> getFailedOrLoadingTransferts() {
 		
-		logMessage.showLog("Récupération des tranferts EN_COURS et ECHOUE\n");
+		log.info("Récupération des tranferts EN_COURS et ECHOUE\n");
 		
 		List<Transfert> transferts = new ArrayList<>();
 
@@ -179,7 +178,7 @@ public class TransfertService {
 			transferts.addAll(etat.getTransferts());
 		});
 		
-		logMessage.showLog(transferts.toString()+"\n");
+		log.info(transferts.toString()+"\n");
 		
 		return transferts;
 	}

@@ -9,6 +9,8 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import javax.validation.Validator;
 
@@ -18,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.example.main.entities.Etat;
@@ -34,40 +38,15 @@ import com.example.main.services.SoldeService;
 import com.example.main.services.TransfertService;
 import com.example.main.utils.Config;
 import com.example.main.utils.LogMessage;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 @SpringBootApplication
 @EnableScheduling
 public class OnemartJobCronAppApplication implements CommandLineRunner {
 
 	@Autowired
-	EtatRepository etatRepo;
-	@Autowired
-	Validator validator;
-	@Autowired
 	EtatService etatService;
-	@Autowired
-	SoldeRepository soldeRepository;
-	@Autowired
-	GSMService gsmService;
-
-	@Autowired
-	TransfertService transfertService;
-
-	@Autowired
-	MessageService messageService;
 	@Autowired SettingService settingService;
-
-	@Autowired
-	LogMessage logMessage;
-	
-	@Autowired
-	TransfertRepository transfertRepository;
-	@Autowired
-	MessageRepository messageRepository;
-
-	
-	@Autowired
-	SoldeService soldeService;
 	
 	@Autowired Config config;
 
@@ -80,11 +59,6 @@ public class OnemartJobCronAppApplication implements CommandLineRunner {
 		this.initEtat();
 		this.initSettings();
 		this.initConfiguration();
-		//this.transfertService.makeTransfert();
-		//this.transfertService.storeTransferts();
-//		this.transfertService.makeTransfert();
-		//this.transfertService.storeTransferts();
-		//this.transfertService.makeTransfert();
 	}
 	
 	public void storeSettings() throws IOException {
@@ -139,6 +113,8 @@ public class OnemartJobCronAppApplication implements CommandLineRunner {
 				{"appOnlineURL", "http://localhost:8000/api/gsmlist", "APP ONLINE URL"},
 				{"syntaxeSoldeURL", "http://localhost:8000/api/soldeSyntaxe", "Get syntaxe URL"},
 				{"syntaxeTransfertURL","http://localhost:8000/api/transfertCabineSyntaxe","Transfert syntaxe URL"},
+				{"executionTimeMakeTransfert", "1000", "Make transfert time execution"},
+				{"executionTimeStoreTransfert", "10000", "Get transfert time execution"},
 		};
 		
 		Setting s;
@@ -171,19 +147,22 @@ public class OnemartJobCronAppApplication implements CommandLineRunner {
 			try {
 				method = config.getClass().getMethod(methodName, String.class);
 				method.invoke(config, value);
-			} catch (NoSuchMethodException | SecurityException e) {
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-			} catch (IllegalArgumentException e) {
-				e.printStackTrace();
-			} catch (InvocationTargetException e) {
+			} catch (NoSuchMethodException |
+					 SecurityException |
+					 IllegalAccessException |
+					 IllegalArgumentException |
+					 InvocationTargetException e) {
 				e.printStackTrace();
 			}
 		}
 		
 		config.initConfig();
 		
+	}
+
+	@Bean
+	public Executor taskExecutor() {
+		return Executors.newSingleThreadScheduledExecutor();
 	}
 
 }
